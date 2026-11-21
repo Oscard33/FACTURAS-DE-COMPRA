@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Control de Compras &amp; Auditoría SIRE</title>
+  <!-- PDF.js para lectura automática y vista previa multipágina compatible con iPad y PC -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root {
+      --bg-app: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f8fafc;
+      --primary: #0f172a;
+      --primary-hover: #1e293b;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --accent-border: #bfdbfe;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --success-border: #a7f3d0;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --danger-border: #fecaca;
+      --warning: #d97706;
+      --warning-soft: #fffbeb;
+      --warning-border: #fde68a;
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --radius: 10px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    button, a, select, input, .dropzone, .month-card, .nav-tab, .sync-pill {
+      touch-action: manipulation;
+    }
+
+    .topbar {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 16px 24px;
+      border-bottom: 1px solid #1e293b;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.5px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .sync-pill:hover {
+      background: #334155;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+    }
+
+    .dot.online { background: #10b981; }
+    .dot.syncing { background: #f59e0b; }
+
+    .nav-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      overflow-x: auto;
+    }
+
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-tab {
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-badge {
+      background: var(--bg-app);
+      color: var(--text-secondary);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .nav-tab.active .tab-badge {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .tab-badge.alert {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 24px auto;
+      padding: 0 24px 60px;
+    }
+
+    .view-section {
+      display: none;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    .alert-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .alert-box {
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 1px solid;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13.5px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .alert-box.error {
+      background: var(--danger-soft);
+      border-color: var(--danger-border);
+      color: #991b1b;
+    }
+
+    .alert-box.success {
+      background: var(--success-soft);
+      border-color: var(--success-border);
+      color: #065f46;
+    }
+
+    .alert-box.warning {
+      background: var(--warning-soft);
+      border-color: var(--warning-border);
+      color: #92400e;
+    }
+
+    .alert-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.8;
+      padding: 0 4px;
+    }
+
+    .upload-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .dropzone {
+      position: relative;
+      overflow: hidden;
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius);
+      background: var(--bg-subtle);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: block;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .dropzone-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .dropzone-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+    }
+
+    /* Overlay táctil directo sobre botones/dropzones para compatibilidad total con iPad Safari */
+    .native-file-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
+      font-size: 16px;
+    }
+
+    .file-btn-wrapper {
+      position: relative;
+      display: inline-flex;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background: #047857;
+    }
+
+    .btn-dark {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-dark:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background: var(--bg-surface);
+      border-color: var(--border);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-subtle);
+      border-color: #cbd5e1;
+    }
+
+    .btn-danger-outline {
+      background: var(--bg-surface);
+      border-color: var(--danger-border);
+      color: var(--danger);
+    }
+
+    .btn-danger-outline:hover {
+      background: var(--danger-soft);
+    }
+
+    .btn-sm {
+      padding: 6px 11px;
+      font-size: 12.5px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .toolbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .toolbar-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .input-control, .select-control {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--bg-surface);
+      color: var(--text-main);
+    }
+
+    .input-control:focus, .select-control:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .months-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .month-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .month-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--accent);
+    }
+
+    .month-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent);
+    }
+
+    .month-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .month-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .month-year {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .month-count-pill {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .month-total-label {
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .month-total-amount {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .month-total-usd {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--success);
+      margin-top: 2px;
+    }
+
+    .month-card-footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .month-detail-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .detail-header {
+      padding: 18px 20px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .detail-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .code-mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .sub-text {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-ok {
+      background: var(--success-soft);
+      color: var(--success);
+    }
+
+    .status-missing {
+      background: var(--danger-soft);
+      color: var(--danger);
+    }
+
+    .status-pending {
+      background: #f1f5f9;
+      color: var(--text-secondary);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .kpi-card.danger {
+      border-color: var(--danger-border);
+      background: var(--danger-soft);
+    }
+
+    .kpi-card.success {
+      border-color: var(--success-border);
+      background: var(--success-soft);
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .kpi-card.danger .kpi-label { color: #991b1b; }
+    .kpi-card.success .kpi-label { color: #065f46; }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .kpi-card.danger .kpi-value { color: var(--danger); }
+    .kpi-card.success .kpi-value { color: var(--success); }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--danger);
+      transition: width 0.3s ease;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 920px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-card.small {
+      max-width: 540px;
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+      background: #e2e8f0;
+    }
+
+    .modal-body.white {
+      background: #ffffff;
+    }
+
+    .pdf-canvas-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .pdf-canvas-list canvas {
+      max-width: 100%;
+      height: auto !important;
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+    }
+
+    /* Estilos específicos para el Voucher de Pago */
+    .voucher-upload-box {
+      border: 1.5px dashed #cbd5e1;
+      background: var(--bg-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    .voucher-preview-wrapper {
+      position: relative;
+      display: inline-block;
+      margin-top: 10px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #fff;
+      max-width: 100%;
+    }
+
+    .voucher-preview-wrapper img {
+      display: block;
+      max-height: 190px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .voucher-modal-img {
+      max-width: 100%;
+      max-height: 75vh;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .sync-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .code-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 14px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 240px;
+      margin-top: 10px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .container { padding: 0 14px 48px; }
+      .topbar { padding: 14px 16px; }
+      .nav-bar { padding: 0 14px; }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">OZ</div>
+        <div>
+          <div class="brand-title" id="headerCompanyTitle">Archivo de Compras SUNAT</div>
+          <div class="brand-subtitle">Control Cronológico de Facturas PDF &bull; Vouchers de Pago &bull; Validación SIRE</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="sync-pill" onclick="switchTab('sync')" title="Configurar enlace de sincronización entre Tablet y PC">
+          <span class="dot" id="syncStatusDot"></span>
+          <span id="syncStatusText">Modo Local (Configurar enlace)</span>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" id="btnQuickSync" style="display:none;" onclick="syncWithCloud(true)">
+          Sincronizar Ahora
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navegación -->
+  <nav class="nav-bar">
+    <div class="nav-inner">
+      <button type="button" class="nav-tab active" data-tab="archivo" onclick="switchTab('archivo')">
+        Recuadros por Mes <span class="tab-badge" id="badgeTotalDocs">0</span>
+      </button>
+      <button type="button" class="nav-tab" data-tab="validacion" onclick="switchTab('validacion')">
+        Validación SIRE (CSV) <span class="tab-badge" id="badgeMissingDocs">Sin validar</span>
+      </button>
+      <button type="button" class="nav-tab" data-tab="sync" onclick="switchTab('sync')">
+        Sincronización y Equipo
+      </button>
+    </div>
+  </nav>
+
+  <!-- Contenido Principal -->
+  <main class="container">
+    <!-- Contenedor de Alertas y Errores -->
+    <div class="alert-stack" id="alertStack"></div>
+
+    <!-- PESTAÑA 1: ARCHIVO CRONOLÓGICO POR RECUADROS MENSUALES -->
+    <section id="view-archivo" class="view-section active">
+
+      <!-- Subida Exclusiva de PDF -->
+      <div class="upload-panel">
+        <div class="dropzone" id="pdfDropzone">
+          <input type="file" id="pdfFileInput" class="native-file-overlay" accept=".pdf,application/pdf" multiple />
+          <div class="dropzone-title">Subir Facturas de Compra (Formato PDF)</div>
+          <div class="dropzone-desc">
+            Toca aquí para seleccionar tus facturas en PDF desde tu iPad o arrástralas desde tu computadora.<br>
+            El sistema detecta automáticamente <strong>Serie-Correlativo, Fecha, Monto y Proveedor</strong>, evita duplicados y te permite adjuntar su <strong>Voucher de Pago (Imagen)</strong>.
+          </div>
+          <span class="btn btn-primary" style="pointer-events: none;">Seleccionar Facturas PDF</span>
+        </div>
+
+        <div id="uploadProgressMsg" style="display:none; margin-top:12px; padding:10px; background:var(--accent-soft); border-radius:8px; font-size:13.5px; font-weight:700; color:var(--accent); text-align:center;"></div>
+      </div>
+
+      <!-- Vista General de Recuadros Mensuales -->
+      <div id="monthsOverviewSection">
+        <div class="toolbar">
+          <div>
+            <div class="toolbar-title">Carpetas Mensuales de Compras</div>
+            <div style="font-size:13px; color:var(--text-secondary);" id="globalSummaryText">
+              Haz clic en cualquier recuadro mensual para desglosar sus facturas, ver el PDF o subir su voucher de pago.
+            </div>
+          </div>
+          <div class="toolbar-controls">
+            <select id="filterYearSelect" class="select-control" onchange="renderMonthsGrid()">
+              <option value="ALL">Todos los años</option>
+            </select>
+            <select id="sortMonthsSelect" class="select-control" onchange="renderMonthsGrid()">
+              <option value="ASC">Orden Cronológico (Ene &rarr; Dic)</option>
+              <option value="DESC">Más reciente primero</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="monthsGridContainer" class="months-grid"></div>
+      </div>
+
+      <!-- Vista Desglosada al Hacer Clic en un Recuadro Mensual -->
+      <div id="monthDetailSection" style="display:none;">
+        <div class="month-detail-panel">
+          <div class="detail-header">
+            <div class="detail-title-group">
+              <button type="button" class="btn btn-outline btn-sm" onclick="closeMonthDetail()">&larr; Volver a Recuadros</button>
+              <div>
+                <div style="font-size:18px; font-weight:800; color:var(--text-main);" id="detailMonthHeading">NOVIEMBRE 2026</div>
+                <div style="font-size:12.5px; color:var(--text-secondary);" id="detailMonthSubheading">Ordenadas cronológicamente del primer al último día del mes</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <input type="text" id="detailSearchInput" class="input-control" placeholder="Buscar proveedor, RUC o N°..." oninput="renderMonthDetailTable()" />
+              <div style="background:var(--primary); color:#fff; padding:8px 14px; border-radius:8px; font-weight:700; font-size:14px;" id="detailMonthTotalBadge">
+                Total: S/ 0.00
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha Emisión</th>
+                  <th>Comprobante</th>
+                  <th>Proveedor / RUC</th>
+                  <th>Monto Total</th>
+                  <th>Voucher Pago</th>
+                  <th>Estado SIRE</th>
+                  <th style="text-align:right;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="detailInvoicesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 2: VALIDACIÓN CONTRA CSV DEL SIRE SUNAT -->
+    <section id="view-validacion" class="view-section">
+      <div class="upload-panel">
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px;">
+          <div>
+            <h2 style="font-size:17px; font-weight:800; margin-bottom:4px;">Auditoría y Validación con Archivo CSV del SIRE (SUNAT)</h2>
+            <p style="font-size:13.5px; color:var(--text-secondary); max-width:760px;">
+              Sube el archivo <strong>.CSV</strong> descargado del módulo RCE (Registro de Compras Electrónico) del <strong>SIRE SUNAT</strong>. El sistema cruzará cada comprobante declarado contra tus PDFs almacenados (ignorando diferencias de ceros a la izquierda) y te alertará si faltan facturas por subir.
+            </p>
+          </div>
+          <div class="file-btn-wrapper">
+            <input type="file" id="csvFileInput" class="native-file-overlay" accept=".csv,.txt,text/csv,text/plain,application/vnd.ms-excel" />
+            <span class="btn btn-dark" style="pointer-events: none;">Subir Archivo CSV (SIRE)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alerta Crítica cuando faltan facturas -->
+      <div id="sireErrorBanner" style="display:none; background:var(--danger-soft); border:2px solid var(--danger); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px; color:#991b1b;">
+        <div style="font-size:16px; font-weight:800; margin-bottom:4px;" id="sireErrorBannerTitle">
+          ERROR DE AUDITORÍA: Faltan facturas registradas en SUNAT SIRE
+        </div>
+        <div style="font-size:13.5px;" id="sireErrorBannerDesc"></div>
+      </div>
+
+      <!-- Alerta de Éxito cuando todo está al 100% -->
+      <div id="sireSuccessBanner" style="display:none; background:var(--success-soft); border:2px solid var(--success); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px; color:#065f46;">
+        <div style="font-size:16px; font-weight:800; margin-bottom:4px;">
+          CONCILIACIÓN COMPLETA (100%): Todas las facturas del SIRE tienen su PDF respaldado
+        </div>
+        <div style="font-size:13.5px;">No se detectaron comprobantes faltantes en el periodo evaluado.</div>
+      </div>
+
+      <!-- KPIs de Validación -->
+      <div id="sireKpiContainer" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <span style="font-size:13px; color:var(--text-secondary);" id="sireLastRunInfo"></span>
+          <button type="button" class="btn btn-outline btn-sm" onclick="reRunLastValidation()">Re-evaluar con PDFs actuales</button>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Total Facturas en SIRE (CSV)</div>
+            <div class="kpi-value" id="kpiTotalSire">0</div>
+            <div class="kpi-sub" id="kpiMatchedSire">0 respaldadas en PDF</div>
+          </div>
+
+          <div class="kpi-card danger" id="kpiCardMissingCount">
+            <div class="kpi-label">Facturas Faltantes (Sin PDF)</div>
+            <div class="kpi-value" id="kpiMissingCount">0</div>
+            <div class="kpi-sub">Documentos pendientes por subir</div>
+          </div>
+
+          <div class="kpi-card danger" id="kpiCardMissingPct">
+            <div class="kpi-label">Porcentaje Faltante</div>
+            <div class="kpi-value" id="kpiMissingPct">0%</div>
+            <div class="progress-track">
+              <div class="progress-fill" id="kpiMissingBar" style="width:0%;"></div>
+            </div>
+          </div>
+
+          <div class="kpi-card danger" id="kpiCardMissingAmount">
+            <div class="kpi-label">Monto Total Faltante</div>
+            <div class="kpi-value" id="kpiMissingAmount">S/ 0.00</div>
+            <div class="kpi-sub" id="kpiMissingAmountUsd">Suma de comprobantes sin PDF</div>
+          </div>
+        </div>
+
+        <!-- Tabla de Facturas Faltantes -->
+        <div class="month-detail-panel" style="margin-top:20px;">
+          <div class="detail-header">
+            <div>
+              <div style="font-size:16px; font-weight:800; color:var(--danger);" id="sireTableTitle">
+                Detalle de Facturas Faltantes por Subir
+              </div>
+              <div style="font-size:12.5px; color:var(--text-secondary);">
+                Comparte esta vista con tu compañero para conseguir y subir los PDFs pendientes.
+              </div>
+            </div>
+            <div>
+              <select id="sireFilterView" class="select-control" onchange="renderValidationTable()">
+                <option value="MISSING">Solo Faltantes (Error)</option>
+                <option value="ALL">Todos los del CSV SIRE</option>
+                <option value="MATCHED">Solo Conciliados OK</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Estado</th>
+                  <th>Fecha Emisión</th>
+                  <th>Comprobante (SIRE)</th>
+                  <th>Proveedor / RUC</th>
+                  <th>Monto Total</th>
+                </tr>
+              </thead>
+              <tbody id="sireValidationTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="sireEmptyState" class="empty-state">
+        <div style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:6px;">Aún no has cargado un reporte CSV del SIRE</div>
+        <div style="font-size:13.5px;">Sube el archivo CSV exportado desde SUNAT SIRE para detectar automáticamente qué facturas faltan, su porcentaje y el monto total no sustentado.</div>
+      </div>
+    </section>
+
+    <!-- PESTAÑA 3: SINCRONIZACIÓN ENTRE DISPOSITIVOS Y EQUIPO -->
+    <section id="view-sync" class="view-section">
+      <div class="sync-card">
+        <h2 style="font-size:17px; font-weight:800; margin-bottom:6px;">Conexión de Enlace en la Nube (Tablet iPad + Computadora + Compañero)</h2>
+        <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:18px;">
+          Pega el mismo <strong>Enlace de Sincronización</strong> en tu tablet, en tu computadora y en el equipo de tu compañero. Así ambos podrán subir facturas PDF, adjuntar sus vouchers de pago en imagen, previsualizar los documentos y revisar qué facturas faltan según la validación SIRE.
+        </p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nombre de Empresa / Carpeta Principal</label>
+            <input type="text" id="cfgCompanyName" class="input-control" placeholder="Ej. Control de Compras" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tu Nombre / Usuario en este dispositivo</label>
+            <input type="text" id="cfgUserName" class="input-control" placeholder="Ej. Oscar (Tablet) o Compañero (PC)" />
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label">Enlace de Sincronización (URL de Google Apps Script Web App o Firebase Realtime DB)</label>
+            <input type="url" id="cfgSyncUrl" class="input-control" placeholder="https://script.google.com/macros/s/...../exec  o  https://tu-proyecto.firebaseio.com" />
+          </div>
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;">
+          <button type="button" class="btn btn-primary" onclick="saveSyncSettings()">Guardar Enlace y Conectar</button>
+          <button type="button" class="btn btn-outline" onclick="syncWithCloud(true)">Sincronizar Datos Ahora</button>
+          <button type="button" class="btn btn-danger-outline" onclick="disconnectCloud()">Desconectar Enlace</button>
+        </div>
+      </div>
+
+      <!-- Respaldo Directo Archivo JSON -->
+      <div class="sync-card">
+        <h3 style="font-size:15.5px; font-weight:800; margin-bottom:6px;">Respaldo Rápido e Importación Directa (Archivo .JSON)</h3>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:14px;">
+          También puedes exportar toda tu base de datos (incluyendo los PDFs, los vouchers de pago y el estado de validación SIRE) en un solo archivo o importar el de tu compañero.
+        </p>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+          <button type="button" class="btn btn-dark btn-sm" onclick="exportFullBackup()">Exportar Base Completa (.JSON)</button>
+          <div class="file-btn-wrapper">
+            <input type="file" id="backupFileInput" class="native-file-overlay" accept=".json,application/json,text/plain" />
+            <span class="btn btn-outline btn-sm" style="pointer-events: none;">Importar Base (.JSON)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guía rápida para crear el enlace gratuito en Google Drive (Apps Script) -->
+      <div class="sync-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <h3 style="font-size:15.5px; font-weight:800;">¿Cómo obtener tu Enlace de Sincronización gratuito con Google Drive?</h3>
+          <button type="button" class="btn btn-outline btn-sm" onclick="copyAppsScriptCode()">Copiar Código para Google Apps Script</button>
+        </div>
+        <p style="font-size:13px; color:var(--text-secondary); margin-top:8px;">
+          1. Entra a <strong>script.google.com</strong> con tu cuenta de Google &rarr; <strong>Nuevo proyecto</strong>.<br>
+          2. Pega el código de abajo (ya incluye respaldo automático tanto de <strong>PDFs</strong> como de <strong>imágenes de Vouchers</strong> en Drive) y haz clic en <strong>Implementar &rarr; Nueva implementación &rarr; Aplicación web</strong> (Ejecutar como: <em>Yo</em>, Quién tiene acceso: <em>Cualquier usuario</em>).<br>
+          3. Copia la <strong>URL de la aplicación web</strong> que te entrega Google y pégala arriba en <em>Enlace de Sincronización</em> en tu iPad y en la PC de tu compañero.
+        </p>
+        <div class="code-box" id="appsScriptSnippet">// Código Google Apps Script para Sincronizar Facturas PDF + Vouchers de Pago + Validación SIRE
+function doGet(e) {
+  var folder = getOrCreateFolder_("FacturasCompra_SIRE");
+  var dbFile = getOrCreateDbFile_(folder);
+  var data = JSON.parse(dbFile.getBlob().getDataAsString() || '{"invoices":[],"validation":null}');
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, data: data }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var payload = JSON.parse(e.postData.contents);
+  var folder = getOrCreateFolder_("FacturasCompra_SIRE");
+  var dbFile = getOrCreateDbFile_(folder);
+  var db = JSON.parse(dbFile.getBlob().getDataAsString() || '{"invoices":[],"validation":null}');
+
+  if (payload.action === "UPSERT_INVOICE" && payload.invoice) {
+    var inv = payload.invoice;
+    var idx = -1;
+    for (var i = 0; i < db.invoices.length; i++) {
+      if (db.invoices[i].normalizedKey === inv.normalizedKey) { idx = i; break; }
+    }
+    if (inv.pdfBase64) {
+      var bytes = Utilities.base64Decode(inv.pdfBase64.split(",").pop());
+      var blob = Utilities.newBlob(bytes, "application/pdf", inv.fileName || (inv.normalizedKey + ".pdf"));
+      var savedPdf = folder.createFile(blob);
+      savedPdf.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      inv.driveFileId = savedPdf.getId();
+      delete inv.pdfBase64;
+    }
+    if (inv.voucherBase64 && inv.voucherBase64.indexOf("data:image") === 0) {
+      var vMatch = inv.voucherBase64.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,/);
+      var vMime = vMatch ? vMatch[1] : "image/jpeg";
+      var vExt = vMime.split("/")[1] || "jpg";
+      var vBytes = Utilities.base64Decode(inv.voucherBase64.split(",").pop());
+      var vBlob = Utilities.newBlob(vBytes, vMime, "VOUCHER_" + (inv.normalizedCode || inv.id) + "." + vExt);
+      var savedVoucher = folder.createFile(vBlob);
+      savedVoucher.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      inv.voucherDriveFileId = savedVoucher.getId();
+      delete inv.voucherBase64;
+    }
+    if (idx !== -1) {
+      inv.driveFileId = inv.driveFileId || db.invoices[idx].driveFileId;
+      if (inv.voucherBase64 === null) {
+        delete inv.voucherDriveFileId;
+      } else {
+        inv.voucherDriveFileId = inv.voucherDriveFileId || db.invoices[idx].voucherDriveFileId;
+      }
+      db.invoices[idx] = inv;
+    } else {
+      db.invoices.push(inv);
+    }
+  } else if (payload.action === "DELETE_INVOICE" && payload.id) {
+    db.invoices = db.invoices.filter(function(x) { return x.id !== payload.id; });
+  } else if (payload.action === "SAVE_VALIDATION") {
+    db.validation = payload.validation;
+  } else if (payload.action === "FULL_SYNC" && payload.data) {
+    db = payload.data;
+  }
+
+  dbFile.setContent(JSON.stringify(db));
+  return ContentService.createTextOutput(JSON.stringify({ ok: true, data: db }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getOrCreateFolder_(name) {
+  var it = DriveApp.getFoldersByName(name);
+  return it.hasNext() ? it.next() : DriveApp.createFolder(name);
+}
+
+function getOrCreateDbFile_(folder) {
+  var it = folder.getFilesByName("database_compras_sire.json");
+  return it.hasNext() ? it.next() : folder.createFile("database_compras_sire.json", '{"invoices":[],"validation":null}', MimeType.PLAIN_TEXT);
+}</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL 1: VISTA PREVIA DE FACTURA PDF (CON ACCESO AL VOUCHER ADJUNTO) -->
+  <div class="modal-backdrop" id="pdfPreviewModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="previewModalTitle">Vista Previa de Factura</div>
+          <div style="font-size:12px; color:#cbd5e1;" id="previewModalSubtitle"></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-success btn-sm" id="btnPreviewVoucherFromPdf" style="display:none;" onclick="openVoucherFromCurrentPdf()">Ver Voucher de Pago</button>
+          <button type="button" class="btn btn-primary btn-sm" id="btnDownloadPreviewPdf">Descargar PDF</button>
+          <button type="button" class="btn btn-outline btn-sm" style="color:#fff; border-color:#475569; background:transparent;" onclick="closePreviewModal()">Cerrar &times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="pdfPreviewBody">
+        <div class="pdf-canvas-list" id="pdfCanvasContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: VERIFICACIÓN / EDICIÓN DE DATOS + SUBIDA DE VOUCHER DE PAGO -->
+  <div class="modal-backdrop" id="editInvoiceModal">
+    <div class="modal-card small">
+      <div class="modal-header">
+        <div class="modal-title" id="editModalTitle">Verificar Datos de Factura PDF</div>
+        <button type="button" class="btn btn-outline btn-sm" style="color:#fff; border-color:#475569; background:transparent;" onclick="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body white">
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:14px;" id="editModalHint">
+          Confirma o corrige los datos detectados del PDF y adjunta opcionalmente la imagen del voucher de pago.
+        </p>
+        <form id="invoiceForm" onsubmit="submitInvoiceForm(event)">
+          <input type="hidden" id="formInvoiceId" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Serie (Ej. F001, E001)</label>
+              <input type="text" id="formSerie" class="input-control" required maxlength="6" style="text-transform:uppercase;" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Correlativo (Ej. 000125)</label>
+              <input type="text" id="formCorrelativo" class="input-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fecha de Emisión</label>
+              <input type="date" id="formFecha" class="input-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Moneda</label>
+              <select id="formMoneda" class="select-control">
+                <option value="PEN">Soles (S/)</option>
+                <option value="USD">Dólares (US$)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Monto Total (Inc. IGV)</label>
+              <input type="number" step="0.01" min="0" id="formMonto" class="input-control" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">RUC del Proveedor (11 dígitos)</label>
+              <input type="text" id="formRuc" class="input-control" maxlength="11" placeholder="20123456789" />
+            </div>
+            <div class="form-group full">
+              <label class="form-label">Razón Social del Proveedor</label>
+              <input type="text" id="formProveedor" class="input-control" required placeholder="Nombre de la empresa emisora" />
+            </div>
+
+            <!-- SECCIÓN DE VOUCHER DE PAGO (IMAGEN) -->
+            <div class="form-group full">
+              <label class="form-label">Voucher / Constancia de Pago (Imagen JPG, PNG, WebP o Foto)</label>
+              <div class="voucher-upload-box">
+                <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; align-items:center;">
+                  <div class="file-btn-wrapper">
+                    <input type="file" id="formVoucherInput" class="native-file-overlay" accept="image/*" />
+                    <span class="btn btn-outline btn-sm" style="pointer-events: none;" id="btnSelectVoucherLabel">Seleccionar / Tomar Foto del Voucher</span>
+                  </div>
+                  <button type="button" class="btn btn-danger-outline btn-sm" id="btnRemoveFormVoucher" style="display:none;" onclick="clearFormVoucher()">Quitar Voucher</button>
+                </div>
+                <div style="font-size:11.5px; color:var(--text-secondary); margin-top:6px;">
+                  La imagen se optimiza automáticamente para cargarse rápido desde iPad o PC.
+                </div>
+                <div id="formVoucherPreviewContainer" style="display:none;">
+                  <div class="voucher-preview-wrapper">
+                    <img id="formVoucherPreviewImg" src="" alt="Vista previa del voucher" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+            <button type="button" class="btn btn-outline" onclick="closeEditModal()">Omitir / Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar en Carpeta Mensual</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: VISTA PREVIA Y GESTIÓN RÁPIDA DE VOUCHER DE PAGO -->
+  <div class="modal-backdrop" id="voucherPreviewModal">
+    <div class="modal-card small">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="voucherModalTitle">Voucher de Pago</div>
+          <div style="font-size:12px; color:#cbd5e1;" id="voucherModalSubtitle"></div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button type="button" class="btn btn-primary btn-sm" id="btnDownloadVoucher">Descargar Imagen</button>
+          <button type="button" class="btn btn-outline btn-sm" style="color:#fff; border-color:#475569; background:transparent;" onclick="closeVoucherModal()">Cerrar &times;</button>
+        </div>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <div id="voucherModalContent"></div>
+        <div style="margin-top:16px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+          <div class="file-btn-wrapper">
+            <input type="file" id="quickReplaceVoucherInput" class="native-file-overlay" accept="image/*" />
+            <span class="btn btn-dark btn-sm" style="pointer-events: none;">Reemplazar Imagen del Voucher</span>
+          </div>
+          <button type="button" class="btn btn-danger-outline btn-sm" style="background:#fff;" onclick="deleteVoucherFromCurrentInvoice()">Eliminar Voucher</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input oculto auxiliar para subir voucher directo desde la fila de la tabla -->
+  <input type="file" id="directRowVoucherInput" accept="image/*" style="display:none;" />
+
+  <script>
+    const MONTHS_ES = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    let state = {
+      invoices: [],
+      validation: null,
+      settings: {
+        syncUrl: "",
+        userName: "Oscar",
+        companyName: "Control de Compras"
+      },
+      selectedMonthKey: null,
+      pendingPdfDraft: null,
+      pendingPdfQueue: [],
+      currentFormVoucherBase64: null,
+      voucherChangedInForm: false,
+      directUploadTargetInvoiceId: null
+    };
+
+    // =========================================================================
+    // 1. BASE DE DATOS LOCAL (IndexedDB con timeout rápido + fallback localStorage)
+    // =========================================================================
+    const DB_NAME = "FacturasCompraSireDB_v2";
+    const DB_VERSION = 1;
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error("IndexedDB no disponible"));
+          return;
+        }
+        let settled = false;
+        const timer = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            reject(new Error("IndexedDB timeout"));
+          }
+        }, 600);
+
+        try {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("kv")) {
+              db.createObjectStore("kv");
+            }
+          };
+          req.onsuccess = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              resolve(req.result);
+            }
+          };
+          req.onerror = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              reject(req.error);
+            }
+          };
+          req.onblocked = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timer);
+              reject(new Error("IndexedDB blocked"));
+            }
+          };
+        } catch (err) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timer);
+            reject(err);
+          }
+        }
+      });
+    }
+
+    async function dbGet(key) {
+      try {
+        const db = await openDB();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction("kv", "readonly");
+          const req = tx.objectStore("kv").get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        try {
+          const raw = localStorage.getItem("fallback_" + key);
+          return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+          return null;
+        }
+      }
+    }
+
+    async function dbSet(key, val) {
+      try {
+        const db = await openDB();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction("kv", "readwrite");
+          const req = tx.objectStore("kv").put(val, key);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      } catch (e) {
+        try {
+          localStorage.setItem("fallback_" + key, JSON.stringify(val));
+        } catch (err) {
+          console.warn("Storage warning:", err);
+        }
+      }
+    }
+
+    async function persistState() {
+      await dbSet("invoices", state.invoices);
+      await dbSet("validation", state.validation);
+      await dbSet("settings", state.settings);
+    }
+
+    // =========================================================================
+    // 2. COMPRESIÓN Y PROCESAMIENTO DE IMAGEN DE VOUCHER DE PAGO
+    // =========================================================================
+    function compressVoucherImageFile(file, maxDim = 1400, quality = 0.82) {
+      return new Promise((resolve, reject) => {
+        if (!file || !file.type.startsWith("image/")) {
+          reject(new Error("El archivo seleccionado no es una imagen válida."));
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+            resolve(compressedDataUrl);
+          };
+          img.onerror = () => reject(new Error("No se pudo procesar la imagen del voucher."));
+          img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error("Error al leer el archivo de imagen."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function updateFormVoucherUI(base64OrDriveUrl) {
+      const previewContainer = document.getElementById("formVoucherPreviewContainer");
+      const previewImg = document.getElementById("formVoucherPreviewImg");
+      const removeBtn = document.getElementById("btnRemoveFormVoucher");
+      const selectLabel = document.getElementById("btnSelectVoucherLabel");
+
+      if (base64OrDriveUrl) {
+        previewImg.src = base64OrDriveUrl;
+        previewContainer.style.display = "block";
+        removeBtn.style.display = "inline-flex";
+        selectLabel.textContent = "Cambiar Imagen del Voucher";
+      } else {
+        previewImg.src = "";
+        previewContainer.style.display = "none";
+        removeBtn.style.display = "none";
+        selectLabel.textContent = "Seleccionar / Tomar Foto del Voucher";
+      }
+    }
+
+    function clearFormVoucher() {
+      state.currentFormVoucherBase64 = null;
+      state.voucherChangedInForm = true;
+      document.getElementById("formVoucherInput").value = "";
+      updateFormVoucherUI(null);
+    }
+
+    document.getElementById("formVoucherInput").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      e.target.value = "";
+      try {
+        const compressed = await compressVoucherImageFile(file);
+        state.currentFormVoucherBase64 = compressed;
+        state.voucherChangedInForm = true;
+        updateFormVoucherUI(compressed);
+      } catch (err) {
+        showAlert("error", err.message || "Error al cargar la imagen del voucher.");
+      }
+    });
+
+    // Subida rápida de voucher directamente desde el botón en la tabla mensual
+    function triggerDirectVoucherUpload(invoiceId) {
+      state.directUploadTargetInvoiceId = invoiceId;
+      const input = document.getElementById("directRowVoucherInput");
+      input.value = "";
+      input.click();
+    }
+
+    document.getElementById("directRowVoucherInput").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      const targetId = state.directUploadTargetInvoiceId;
+      state.directUploadTargetInvoiceId = null;
+      if (!file || !targetId) return;
+      e.target.value = "";
+
+      const idx = state.invoices.findIndex((x) => x.id === targetId);
+      if (idx === -1) return;
+
+      try {
+        const compressed = await compressVoucherImageFile(file);
+        state.invoices[idx].voucherBase64 = compressed;
+        state.invoices[idx].voucherUploadedAt = new Date().toISOString();
+        state.invoices[idx].voucherUploadedBy = state.settings.userName || "Usuario";
+
+        await persistState();
+        pushInvoiceToCloud(state.invoices[idx]);
+        renderAll();
+        showAlert("success", `Voucher de pago adjuntado a la factura ${state.invoices[idx].serie}-${state.invoices[idx].correlativo}.`);
+      } catch (err) {
+        showAlert("error", err.message || "Error al subir la imagen del voucher.");
+      }
+    });
+
+    // =========================================================================
+    // 3. NORMALIZACIÓN ESTRICTA ANTI-DUPLICADOS (CEROS A LA IZQUIERDA)
+    // =========================================================================
+    function normalizeInvoiceParts(rawSerie, rawCorrelativo, rawRuc = "") {
+      const serie = String(rawSerie || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const digitsOnly = String(rawCorrelativo || "").trim().replace(/[^0-9]/g, "");
+      const correlativoNum = digitsOnly ? parseInt(digitsOnly, 10) : 0;
+      const paddedCorrelativo = digitsOnly ? digitsOnly.padStart(8, "0") : "00000000";
+      const normalizedCode = `${serie}-${correlativoNum}`;
+      const cleanRuc = String(rawRuc || "").trim().replace(/[^0-9]/g, "");
+      const normalizedKey = cleanRuc.length === 11 ? `${cleanRuc}|${normalizedCode}` : normalizedCode;
+      return {
+        serie,
+        correlativoOriginal: digitsOnly || rawCorrelativo,
+        correlativoNum,
+        paddedCorrelativo,
+        normalizedCode,
+        cleanRuc,
+        normalizedKey
+      };
+    }
+
+    function findDuplicateInvoice(serie, correlativo, ruc = "", excludeId = null) {
+      const target = normalizeInvoiceParts(serie, correlativo, ruc);
+      return state.invoices.find((inv) => {
+        if (excludeId && inv.id === excludeId) return false;
+        const existing = normalizeInvoiceParts(inv.serie, inv.correlativo, inv.rucProveedor);
+        if (existing.normalizedCode === target.normalizedCode) {
+          if (!existing.cleanRuc || !target.cleanRuc || existing.cleanRuc === target.cleanRuc) {
+            return true;
+          }
+        }
+        return false;
+      });
+    }
+
+    // =========================================================================
+    // 4. EXTRACCIÓN AUTOMÁTICA DE DATOS DESDE PDF (SUNAT PERÚ, SIN BLOQUEOS)
+    // =========================================================================
+    async function extractTextFromPdfArrayBuffer(arrayBuffer) {
+      if (!window.pdfjsLib) return "";
+      const extractPromise = (async () => {
+        const loadingTask = pdfjsLib.getDocument({
+          data: arrayBuffer,
+          disableWorker: true,
+          isEvalSupported: false
+        });
+        const pdf = await loadingTask.promise;
+        let fullText = "";
+        const maxPages = Math.min(pdf.numPages, 5);
+        for (let i = 1; i <= maxPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageStrings = textContent.items.map((item) => item.str);
+          fullText += pageStrings.join(" ") + "\n";
+        }
+        return fullText;
+      })();
+
+      const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(""), 4000));
+      return await Promise.race([extractPromise, timeoutPromise]);
+    }
+
+    function parseSpanishMonthName(name) {
+      const map = {
+        ene: "01", enero: "01",
+        feb: "02", febrero: "02",
+        mar: "03", marzo: "03",
+        abr: "04", abril: "04",
+        may: "05", mayo: "05",
+        jun: "06", junio: "06",
+        jul: "07", julio: "07",
+        ago: "08", agosto: "08",
+        sep: "09", set: "09", septiembre: "09", setiembre: "09",
+        oct: "10", octubre: "10",
+        nov: "11", noviembre: "11",
+        dic: "12", diciembre: "12"
+      };
+      return map[name.toLowerCase()] || null;
+    }
+
+    function parseInvoiceMetadataFromText(text, fileName = "") {
+      const cleanText = text.replace(/\s+/g, " ").trim();
+
+      let serie = "";
+      let correlativo = "";
+      const invoiceRegexes = [
+        /\b([FBE][A-Z0-9]{3})\s*[-–—N°#:\s]\s*0*(\d{1,10})\b/i,
+        /FACTURA\s+ELECTR[ÓO]NICA[\s\S]{0,60}?\b([FBE][A-Z0-9]{3})\s*[-–—]\s*(\d{1,10})\b/i,
+        /\b([FBE][0-9]{3})\s*-\s*(\d{1,10})\b/i
+      ];
+
+      for (const rx of invoiceRegexes) {
+        const m = cleanText.match(rx) || fileName.match(rx);
+        if (m) {
+          serie = m[1].toUpperCase();
+          correlativo = m[2];
+          break;
+        }
+      }
+
+      let fecha = "";
+      const fechaContextMatch = cleanText.match(/Fecha\s*(?:de\s*)?Emisi[óo]n[\s:.-]*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/i);
+      const rawDateCandidate = fechaContextMatch ? fechaContextMatch[1] : null;
+
+      function normalizeDateStr(dStr) {
+        if (!dStr) return "";
+        let m = dStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (m) {
+          return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+        }
+        m = dStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+        if (m) {
+          const year = m[3].length === 2 ? `20${m[3]}` : m[3];
+          const month = m[2].padStart(2, "0");
+          const day = m[1].padStart(2, "0");
+          if (parseInt(month, 10) >= 1 && parseInt(month, 10) <= 12 && parseInt(day, 10) >= 1 && parseInt(day, 10) <= 31) {
+            return `${year}-${month}-${day}`;
+          }
+        }
+        return "";
+      }
+
+      fecha = normalizeDateStr(rawDateCandidate);
+      if (!fecha) {
+        const anyDate = cleanText.match(/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]20\d{2})\b/) || cleanText.match(/\b(20\d{2}[\/\-]\d{1,2}[\/\-]\d{1,2})\b/);
+        if (anyDate) fecha = normalizeDateStr(anyDate[1]);
+      }
+      if (!fecha) {
+        const textDate = cleanText.match(/\b(\d{1,2})\s+de\s+([a-zA-Z]+)\s+(?:de|del)\s+(20\d{2})\b/i);
+        if (textDate) {
+          const mm = parseSpanishMonthName(textDate[2]);
+          if (mm) fecha = `${textDate[3]}-${mm}-${textDate[1].padStart(2, "0")}`;
+        }
+      }
+
+      let moneda = "PEN";
+      if (/\b(USD|US\$|D[ÓO]LARES)\b/i.test(cleanText) && !/\bSOLES\b/i.test(cleanText)) {
+        moneda = "USD";
+      }
+
+      let monto = 0;
+      const totalPatterns = [
+        /(?:IMPORTE\s+TOTAL|TOTAL\s+A\s+PAGAR|TOTAL\s+VENTA|TOTAL\s+GENERAL|TOTAL\s+FACTURA)[\s:S\/US$]*([\d,]+\.\d{2})/i,
+        /(?:TOTAL)[\s:]*(?:S\/|US\$)?\s*([\d,]+\.\d{2})/i
+      ];
+      for (const rx of totalPatterns) {
+        const m = cleanText.match(rx);
+        if (m) {
+          const val = parseFloat(m[1].replace(/,/g, ""));
+          if (!isNaN(val) && val > 0) {
+            monto = val;
+            break;
+          }
+        }
+      }
+      if (!monto) {
+        const allAmounts = [...cleanText.matchAll(/(?:S\/|US\$)?\s*(\d{1,3}(?:,\d{3})*\.\d{2})\b/g)]
+          .map((m) => parseFloat(m[1].replace(/,/g, "")))
+          .filter((n) => !isNaN(n) && n > 0 && n < 10000000);
+        if (allAmounts.length > 0) {
+          monto = Math.max(...allAmounts);
+        }
+      }
+
+      let rucProveedor = "";
+      const rucMatches = [...cleanText.matchAll(/\b((?:10|20)\d{9})\b/g)].map((m) => m[1]);
+      if (rucMatches.length > 0) {
+        rucProveedor = rucMatches[0];
+      }
+
+      let proveedor = "";
+      const companySuffixMatch = cleanText.match(/([A-ZÁÉÍÓÚÑ0-9&.,\-\s]{4,75}?\b(?:S\.A\.C\.|S\.A\.|S\.R\.L\.|E\.I\.R\.L\.|S\.A\.A\.|SAC|SRL|EIRL))/);
+      if (companySuffixMatch) {
+        proveedor = companySuffixMatch[1].replace(/^.*?(?:RUC\s*:?\s*\d{11}|SE[ÑN]OR\(ES\)|CLIENTE)\s*/i, "").trim();
+      }
+      if (!proveedor && rucProveedor) {
+        const beforeRuc = cleanText.split(rucProveedor)[0].trim();
+        const words = beforeRuc.split(" ").slice(-6).join(" ").trim();
+        if (words.length >= 4) proveedor = words;
+      }
+
+      return {
+        serie,
+        correlativo,
+        fecha,
+        moneda,
+        monto,
+        rucProveedor,
+        proveedor
+      };
+    }
+
+    // =========================================================================
+    // 5. MANEJO DE SUBIDA DE ARCHIVOS PDF (COMPATIBLE IPAD & PC)
+    // =========================================================================
+    const dropzone = document.getElementById("pdfDropzone");
+    const pdfFileInput = document.getElementById("pdfFileInput");
+
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragover");
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handlePdfFilesUpload(e.dataTransfer.files);
+      }
+    });
+
+    pdfFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const selected = Array.from(e.target.files);
+        e.target.value = "";
+        handlePdfFilesUpload(selected);
+      }
+    });
+
+    function readFileAsArrayBufferSafe(file) {
+      if (typeof file.arrayBuffer === "function") {
+        return file.arrayBuffer();
+      }
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function arrayBufferToBase64(buffer) {
+      let binary = "";
+      const bytes = new Uint8Array(buffer);
+      const len = bytes.byteLength;
+      const chunkSize = 0x8000;
+      for (let i = 0; i < len; i += chunkSize) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+      }
+      return "data:application/pdf;base64," + btoa(binary);
+    }
+
+    async function handlePdfFilesUpload(fileList) {
+      const files = Array.from(fileList);
+      const progressEl = document.getElementById("uploadProgressMsg");
+      progressEl.style.display = "block";
+      progressEl.textContent = `Leyendo ${files.length} archivo(s)...`;
+
+      let addedCount = 0;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        progressEl.textContent = `Procesando PDF ${i + 1} de ${files.length}: ${file.name}...`;
+
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        if (!isPdf) {
+          showAlert("error", `Archivo rechazado (${file.name}): Este sistema solo acepta comprobantes en formato PDF.`);
+          continue;
+        }
+
+        try {
+          const arrayBuffer = await readFileAsArrayBufferSafe(file);
+          const pdfBase64 = arrayBufferToBase64(arrayBuffer);
+          let parsed = { serie: "", correlativo: "", fecha: "", moneda: "PEN", monto: 0, rucProveedor: "", proveedor: "" };
+
+          try {
+            const extractedText = await extractTextFromPdfArrayBuffer(arrayBuffer.slice(0));
+            parsed = parseInvoiceMetadataFromText(extractedText, file.name);
+          } catch (pdfParseErr) {
+            console.warn("Extracción automática omitida, se solicitará confirmación manual:", pdfParseErr);
+          }
+
+          if (parsed.serie && parsed.correlativo && parsed.fecha && parsed.monto > 0 && parsed.proveedor) {
+            const dup = findDuplicateInvoice(parsed.serie, parsed.correlativo, parsed.rucProveedor);
+            if (dup) {
+              const norm = normalizeInvoiceParts(parsed.serie, parsed.correlativo);
+              showAlert(
+                "error",
+                `FACTURA DUPLICADA BLOQUEADA (${file.name}): El comprobante ${parsed.serie}-${parsed.correlativo} (equivalente a ${norm.normalizedCode}) ya fue registrado anteriormente el ${formatDateShort(dup.fecha)} por ${dup.proveedor}. No se sumó al mes.`
+              );
+              continue;
+            }
+
+            const newInvoice = buildInvoiceObject({
+              ...parsed,
+              pdfBase64,
+              fileName: file.name
+            });
+
+            state.invoices.push(newInvoice);
+            addedCount++;
+            pushInvoiceToCloud(newInvoice);
+          } else {
+            state.pendingPdfQueue.push({
+              pdfBase64,
+              fileName: file.name,
+              parsed
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          showAlert("error", `Error al leer el PDF "${file.name}". Verifica que no esté dañado o protegido con contraseña.`);
+        }
+      }
+
+      progressEl.style.display = "none";
+
+      if (addedCount > 0) {
+        await persistState();
+        if (state.validation) reRunLastValidation(true);
+        renderAll();
+        showAlert("success", `Se archivaron ${addedCount} factura(s) PDF correctamente. Puedes adjuntar sus vouchers de pago desde la tabla de cada mes.`);
+      }
+
+      processNextPendingPdfInQueue();
+    }
+
+    function processNextPendingPdfInQueue() {
+      if (state.pendingPdfDraft || state.pendingPdfQueue.length === 0) return;
+      const next = state.pendingPdfQueue.shift();
+      state.pendingPdfDraft = {
+        pdfBase64: next.pdfBase64,
+        fileName: next.fileName
+      };
+      const p = next.parsed || {};
+      const remainingTxt = state.pendingPdfQueue.length > 0 ? ` (Quedan ${state.pendingPdfQueue.length} más en cola)` : "";
+      openEditModal({
+        id: "",
+        serie: p.serie || "F001",
+        correlativo: p.correlativo || "",
+        fecha: p.fecha || new Date().toISOString().slice(0, 10),
+        moneda: p.moneda || "PEN",
+        monto: p.monto || "",
+        rucProveedor: p.rucProveedor || "",
+        proveedor: p.proveedor || "",
+        voucherBase64: null
+      }, `Confirma o completa los datos de "${next.fileName}" y adjunta su voucher de pago si ya lo tienes${remainingTxt}:`);
+    }
+
+    function buildInvoiceObject({ serie, correlativo, fecha, moneda, monto, rucProveedor, proveedor, pdfBase64, fileName, voucherBase64 = null }) {
+      const norm = normalizeInvoiceParts(serie, correlativo, rucProveedor);
+      const yearMonth = fecha.slice(0, 7);
+      return {
+        id: "inv_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+        serie: norm.serie,
+        correlativo: norm.correlativoOriginal,
+        correlativoNum: norm.correlativoNum,
+        normalizedCode: norm.normalizedCode,
+        normalizedKey: norm.normalizedKey,
+        fecha,
+        yearMonth,
+        moneda: moneda || "PEN",
+        monto: parseFloat(monto) || 0,
+        rucProveedor: norm.cleanRuc,
+        proveedor: String(proveedor || "PROVEEDOR SIN NOMBRE").trim().toUpperCase(),
+        pdfBase64,
+        fileName: fileName || `${norm.normalizedCode}.pdf`,
+        voucherBase64: voucherBase64 || null,
+        voucherDriveFileId: null,
+        uploadedBy: state.settings.userName || "Usuario",
+        uploadedAt: new Date().toISOString()
+      };
+    }
+
+    // =========================================================================
+    // 6. MODAL DE EDICIÓN / VERIFICACIÓN MANUAL + VOUCHER DE PAGO
+    // =========================================================================
+    function openEditModal(inv, customHint = null) {
+      document.getElementById("formInvoiceId").value = inv.id || "";
+      document.getElementById("formSerie").value = inv.serie || "";
+      document.getElementById("formCorrelativo").value = inv.correlativo || "";
+      document.getElementById("formFecha").value = inv.fecha || "";
+      document.getElementById("formMoneda").value = inv.moneda || "PEN";
+      document.getElementById("formMonto").value = inv.monto || "";
+      document.getElementById("formRuc").value = inv.rucProveedor || "";
+      document.getElementById("formProveedor").value = inv.proveedor || "";
+
+      state.currentFormVoucherBase64 = inv.voucherBase64 || null;
+      state.voucherChangedInForm = false;
+
+      if (inv.voucherBase64) {
+        updateFormVoucherUI(inv.voucherBase64);
+      } else if (inv.voucherDriveFileId) {
+        updateFormVoucherUI(`https://drive.google.com/thumbnail?id=${inv.voucherDriveFileId}&sz=w800`);
+      } else {
+        updateFormVoucherUI(null);
+      }
+
+      document.getElementById("editModalTitle").textContent = inv.id ? "Editar Factura y Voucher de Pago" : "Completar Datos de Factura y Voucher";
+      document.getElementById("editModalHint").textContent = customHint || "Verifica los campos del comprobante y sube o actualiza la imagen del voucher de pago.";
+      document.getElementById("editInvoiceModal").classList.add("open");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editInvoiceModal").classList.remove("open");
+      state.pendingPdfDraft = null;
+      state.currentFormVoucherBase64 = null;
+      state.voucherChangedInForm = false;
+      setTimeout(processNextPendingPdfInQueue, 150);
+    }
+
+    async function submitInvoiceForm(e) {
+      e.preventDefault();
+      const id = document.getElementById("formInvoiceId").value;
+      const serie = document.getElementById("formSerie").value.trim().toUpperCase();
+      const correlativo = document.getElementById("formCorrelativo").value.trim();
+      const fecha = document.getElementById("formFecha").value;
+      const moneda = document.getElementById("formMoneda").value;
+      const monto = parseFloat(document.getElementById("formMonto").value);
+      const rucProveedor = document.getElementById("formRuc").value.trim();
+      const proveedor = document.getElementById("formProveedor").value.trim().toUpperCase();
+
+      const dup = findDuplicateInvoice(serie, correlativo, rucProveedor, id || null);
+      if (dup) {
+        const norm = normalizeInvoiceParts(serie, correlativo);
+        showAlert(
+          "error",
+          `ERROR DE DUPLICIDAD: El comprobante ${serie}-${correlativo} (normalizado: ${norm.normalizedCode}) ya existe en el sistema (${dup.proveedor} - ${formatDateShort(dup.fecha)}). No se permite duplicar ni alterar el monto mensual.`
+        );
+        return;
+      }
+
+      if (id) {
+        const idx = state.invoices.findIndex((x) => x.id === id);
+        if (idx !== -1) {
+          const norm = normalizeInvoiceParts(serie, correlativo, rucProveedor);
+          const updatedInv = {
+            ...state.invoices[idx],
+            serie: norm.serie,
+            correlativo: norm.correlativoOriginal,
+            correlativoNum: norm.correlativoNum,
+            normalizedCode: norm.normalizedCode,
+            normalizedKey: norm.normalizedKey,
+            fecha,
+            yearMonth: fecha.slice(0, 7),
+            moneda,
+            monto,
+            rucProveedor: norm.cleanRuc,
+            proveedor
+          };
+          if (state.voucherChangedInForm) {
+            updatedInv.voucherBase64 = state.currentFormVoucherBase64;
+            if (!state.currentFormVoucherBase64) {
+              updatedInv.voucherDriveFileId = null;
+            }
+          }
+          state.invoices[idx] = updatedInv;
+          pushInvoiceToCloud(state.invoices[idx]);
+        }
+      } else if (state.pendingPdfDraft) {
+        const newInv = buildInvoiceObject({
+          serie,
+          correlativo,
+          fecha,
+          moneda,
+          monto,
+          rucProveedor,
+          proveedor,
+          pdfBase64: state.pendingPdfDraft.pdfBase64,
+          fileName: state.pendingPdfDraft.fileName,
+          voucherBase64: state.currentFormVoucherBase64
+        });
+        state.invoices.push(newInv);
+        pushInvoiceToCloud(newInv);
+      }
+
+      document.getElementById("editInvoiceModal").classList.remove("open");
+      state.pendingPdfDraft = null;
+      state.currentFormVoucherBase64 = null;
+      state.voucherChangedInForm = false;
+      await persistState();
+      if (state.validation) reRunLastValidation(true);
+      renderAll();
+      showAlert("success", `Factura ${serie}-${correlativo} guardada correctamente en la carpeta de ${formatYearMonthLabel(fecha.slice(0, 7))}.`);
+      setTimeout(processNextPendingPdfInQueue, 150);
+    }
+
+    // =========================================================================
+    // 7. RENDERIZADO DE RECUADROS MENSUALES Y DESGLOSE CRONOLÓGICO
+    // =========================================================================
+    function formatYearMonthLabel(ym) {
+      if (!ym || !ym.includes("-")) return ym;
+      const [y, m] = ym.split("-");
+      const monthName = MONTHS_ES[parseInt(m, 10) - 1] || m;
+      return `${monthName} ${y}`;
+    }
+
+    function formatDateShort(isoDate) {
+      if (!isoDate || !isoDate.includes("-")) return isoDate || "-";
+      const [y, m, d] = isoDate.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    function formatMoney(amount, currency = "PEN") {
+      const symbol = currency === "USD" ? "US$ " : "S/ ";
+      return symbol + Number(amount || 0).toLocaleString("es-PE", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function hasVoucherAttached(inv) {
+      return Boolean(inv && (inv.voucherBase64 || inv.voucherDriveFileId));
+    }
+
+    function renderMonthsGrid() {
+      const grid = document.getElementById("monthsGridContainer");
+      const yearSelect = document.getElementById("filterYearSelect");
+      const sortOrder = document.getElementById("sortMonthsSelect").value;
+
+      const years = [...new Set(state.invoices.map((inv) => inv.yearMonth.slice(0, 4)))].sort();
+      const currentYearVal = yearSelect.value;
+      yearSelect.innerHTML = `<option value="ALL">Todos los años</option>` +
+        years.map((y) => `<option value="${y}">${y}</option>`).join("");
+      if (years.includes(currentYearVal)) yearSelect.value = currentYearVal;
+
+      const selectedYear = yearSelect.value;
+      const filteredInvoices = selectedYear === "ALL"
+        ? state.invoices
+        : state.invoices.filter((inv) => inv.yearMonth.startsWith(selectedYear));
+
+      if (filteredInvoices.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:6px;">No hay facturas de compra registradas todavía</div>
+            <div style="font-size:13.5px;">Sube tus facturas electrónicas en PDF arriba y se crearán automáticamente los recuadros mensuales con el total acumulado.</div>
+          </div>
+        `;
+        return;
+      }
+
+      const groups = {};
+      filteredInvoices.forEach((inv) => {
+        if (!groups[inv.yearMonth]) {
+          groups[inv.yearMonth] = {
+            yearMonth: inv.yearMonth,
+            count: 0,
+            voucherCount: 0,
+            totalPEN: 0,
+            totalUSD: 0
+          };
+        }
+        groups[inv.yearMonth].count++;
+        if (hasVoucherAttached(inv)) groups[inv.yearMonth].voucherCount++;
+        if (inv.moneda === "USD") {
+          groups[inv.yearMonth].totalUSD += inv.monto;
+        } else {
+          groups[inv.yearMonth].totalPEN += inv.monto;
+        }
+      });
+
+      const sortedKeys = Object.keys(groups).sort((a, b) => sortOrder === "ASC" ? a.localeCompare(b) : b.localeCompare(a));
+
+      grid.innerHTML = sortedKeys.map((ym) => {
+        const g = groups[ym];
+        const [y, m] = ym.split("-");
+        const monthName = MONTHS_ES[parseInt(m, 10) - 1] || m;
+        return `
+          <div class="month-card" onclick="openMonthDetail('${ym}')">
+            <div>
+              <div class="month-card-header">
+                <div>
+                  <div class="month-name">${monthName}</div>
+                  <div class="month-year">Año ${y}</div>
+                </div>
+                <span class="month-count-pill">${g.count} ${g.count === 1 ? "factura" : "facturas"}</span>
+              </div>
+              <div class="month-total-label">Monto Total Acumulado</div>
+              <div class="month-total-amount">${formatMoney(g.totalPEN, "PEN")}</div>
+              ${g.totalUSD > 0 ? `<div class="month-total-usd">+ ${formatMoney(g.totalUSD, "USD")}</div>` : ""}
+              <div style="font-size:12px; color:var(--text-secondary); margin-top:6px;">
+                Vouchers adjuntos: <strong>${g.voucherCount} de ${g.count}</strong>
+              </div>
+            </div>
+            <div class="month-card-footer">
+              <span>Ver desglose y vouchers</span>
+              <span>&rarr;</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function openMonthDetail(ym) {
+      state.selectedMonthKey = ym;
+      document.getElementById("monthsOverviewSection").style.display = "none";
+      document.getElementById("monthDetailSection").style.display = "block";
+      document.getElementById("detailSearchInput").value = "";
+      renderMonthDetailTable();
+    }
+
+    function closeMonthDetail() {
+      state.selectedMonthKey = null;
+      document.getElementById("monthDetailSection").style.display = "none";
+      document.getElementById("monthsOverviewSection").style.display = "block";
+      renderMonthsGrid();
+    }
+
+    function renderMonthDetailTable() {
+      const ym = state.selectedMonthKey;
+      if (!ym) return;
+
+      const query = (document.getElementById("detailSearchInput").value || "").trim().toLowerCase();
+      document.getElementById("detailMonthHeading").textContent = formatYearMonthLabel(ym).toUpperCase();
+
+      let monthInvoices = state.invoices
+        .filter((inv) => inv.yearMonth === ym)
+        .sort((a, b) => {
+          if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+          if (a.serie !== b.serie) return a.serie.localeCompare(b.serie);
+          return a.correlativoNum - b.correlativoNum;
+        });
+
+      const totalPEN = monthInvoices.filter((i) => i.moneda !== "USD").reduce((acc, i) => acc + i.monto, 0);
+      const totalUSD = monthInvoices.filter((i) => i.moneda === "USD").reduce((acc, i) => acc + i.monto, 0);
+      let badgeText = `Total: ${formatMoney(totalPEN, "PEN")}`;
+      if (totalUSD > 0) badgeText += ` | ${formatMoney(totalUSD, "USD")}`;
+      document.getElementById("detailMonthTotalBadge").textContent = badgeText;
+
+      if (query) {
+        monthInvoices = monthInvoices.filter((inv) =>
+          inv.proveedor.toLowerCase().includes(query) ||
+          (inv.rucProveedor && inv.rucProveedor.includes(query)) ||
+          inv.normalizedCode.toLowerCase().includes(query) ||
+          `${inv.serie}-${inv.correlativo}`.toLowerCase().includes(query)
+        );
+      }
+
+      const matchedSet = new Set((state.validation && state.validation.matchedNormalizedCodes) || []);
+      const tbody = document.getElementById("detailInvoicesTbody");
+
+      if (monthInvoices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-secondary);">No se encontraron facturas con ese criterio en este mes.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = monthInvoices.map((inv) => {
+        const isMatched = matchedSet.has(inv.normalizedCode);
+        const sireStatusHtml = state.validation
+          ? (isMatched
+              ? `<span class="status-tag status-ok">Conciliado SIRE</span>`
+              : `<span class="status-tag status-pending">No en CSV actual</span>`)
+          : `<span class="status-tag status-pending">Sin validar CSV</span>`;
+
+        const hasVoucher = hasVoucherAttached(inv);
+        const voucherCellHtml = hasVoucher
+          ? `<button type="button" class="btn btn-success btn-sm" onclick="previewVoucherImage('${inv.id}')">Ver Voucher</button>`
+          : `<button type="button" class="btn btn-outline btn-sm" style="border-style:dashed; color:var(--accent); border-color:var(--accent);" onclick="triggerDirectVoucherUpload('${inv.id}')">+ Subir Voucher</button>`;
+
+        return `
+          <tr>
+            <td><strong>${formatDateShort(inv.fecha)}</strong></td>
+            <td>
+              <span class="code-mono">${inv.serie}-${inv.correlativo}</span>
+              <span class="sub-text">Subido por: ${inv.uploadedBy || "Local"}</span>
+            </td>
+            <td>
+              <strong>${inv.proveedor}</strong>
+              <span class="sub-text">${inv.rucProveedor ? "RUC: " + inv.rucProveedor : "RUC no detectado"}</span>
+            </td>
+            <td><strong>${formatMoney(inv.monto, inv.moneda)}</strong></td>
+            <td>${voucherCellHtml}</td>
+            <td>${sireStatusHtml}</td>
+            <td style="text-align:right; white-space:nowrap;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="previewInvoicePdf('${inv.id}')">Ver PDF</button>
+              <button type="button" class="btn btn-outline btn-sm" onclick="editInvoiceById('${inv.id}')">Editar</button>
+              <button type="button" class="btn btn-danger-outline btn-sm" onclick="deleteInvoice('${inv.id}')">Eliminar</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function editInvoiceById(id) {
+      const inv = state.invoices.find((x) => x.id === id);
+      if (inv) openEditModal(inv);
+    }
+
+    async function deleteInvoice(id) {
+      const inv = state.invoices.find((x) => x.id === id);
+      if (!inv) return;
+      if (!confirm(`¿Seguro que deseas eliminar la factura ${inv.serie}-${inv.correlativo} de ${inv.proveedor}?`)) return;
+
+      state.invoices = state.invoices.filter((x) => x.id !== id);
+      await persistState();
+      deleteInvoiceFromCloud(id);
+      if (state.validation) reRunLastValidation(true);
+
+      const remainingInMonth = state.invoices.filter((x) => x.yearMonth === state.selectedMonthKey);
+      if (remainingInMonth.length === 0) {
+        closeMonthDetail();
+      } else {
+        renderMonthDetailTable();
+      }
+      renderAll();
+    }
+
+    // =========================================================================
+    // 8. VISTA PREVIA DE VOUCHER DE PAGO (IMAGEN)
+    // =========================================================================
+    let currentPreviewVoucherInvoice = null;
+
+    function previewVoucherImage(invoiceId) {
+      const inv = state.invoices.find((x) => x.id === invoiceId);
+      if (!inv) return;
+      currentPreviewVoucherInvoice = inv;
+
+      document.getElementById("voucherModalTitle").textContent = `Voucher de Pago — ${inv.serie}-${inv.correlativo}`;
+      document.getElementById("voucherModalSubtitle").textContent = `${inv.proveedor} | Monto: ${formatMoney(inv.monto, inv.moneda)}`;
+
+      const contentEl = document.getElementById("voucherModalContent");
+      if (inv.voucherBase64) {
+        contentEl.innerHTML = `<img src="${inv.voucherBase64}" alt="Voucher de pago" class="voucher-modal-img" />`;
+      } else if (inv.voucherDriveFileId) {
+        contentEl.innerHTML = `
+          <img src="https://drive.google.com/thumbnail?id=${inv.voucherDriveFileId}&sz=w1200" alt="Voucher en Drive" class="voucher-modal-img" />
+          <div style="margin-top:10px;">
+            <a href="https://drive.google.com/file/d/${inv.voucherDriveFileId}/view" target="_blank" class="btn btn-outline btn-sm" style="background:#fff;">Abrir imagen original en Google Drive</a>
+          </div>
+        `;
+      } else {
+        contentEl.innerHTML = `<div style="background:#fff; padding:24px; border-radius:8px;">No hay imagen de voucher adjunta.</div>`;
+      }
+
+      document.getElementById("voucherPreviewModal").classList.add("open");
+    }
+
+    function closeVoucherModal() {
+      document.getElementById("voucherPreviewModal").classList.remove("open");
+      currentPreviewVoucherInvoice = null;
+    }
+
+    document.getElementById("btnDownloadVoucher").addEventListener("click", () => {
+      if (!currentPreviewVoucherInvoice) return;
+      if (currentPreviewVoucherInvoice.voucherBase64) {
+        const a = document.createElement("a");
+        a.href = currentPreviewVoucherInvoice.voucherBase64;
+        a.download = `Voucher_${currentPreviewVoucherInvoice.normalizedCode}.jpg`;
+        a.click();
+      } else if (currentPreviewVoucherInvoice.voucherDriveFileId) {
+        window.open(`https://drive.google.com/uc?export=download&id=${currentPreviewVoucherInvoice.voucherDriveFileId}`, "_blank");
+      }
+    });
+
+    document.getElementById("quickReplaceVoucherInput").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file || !currentPreviewVoucherInvoice) return;
+      e.target.value = "";
+
+      const idx = state.invoices.findIndex((x) => x.id === currentPreviewVoucherInvoice.id);
+      if (idx === -1) return;
+
+      try {
+        const compressed = await compressVoucherImageFile(file);
+        state.invoices[idx].voucherBase64 = compressed;
+        state.invoices[idx].voucherUploadedAt = new Date().toISOString();
+        state.invoices[idx].voucherUploadedBy = state.settings.userName || "Usuario";
+
+        await persistState();
+        pushInvoiceToCloud(state.invoices[idx]);
+        renderAll();
+        previewVoucherImage(state.invoices[idx].id);
+        showAlert("success", "Imagen del voucher actualizada correctamente.");
+      } catch (err) {
+        showAlert("error", err.message || "Error al reemplazar el voucher.");
+      }
+    });
+
+    async function deleteVoucherFromCurrentInvoice() {
+      if (!currentPreviewVoucherInvoice) return;
+      if (!confirm("¿Seguro que deseas eliminar la imagen del voucher de esta factura?")) return;
+
+      const idx = state.invoices.findIndex((x) => x.id === currentPreviewVoucherInvoice.id);
+      if (idx !== -1) {
+        state.invoices[idx].voucherBase64 = null;
+        state.invoices[idx].voucherDriveFileId = null;
+        await persistState();
+        pushInvoiceToCloud(state.invoices[idx]);
+        renderAll();
+      }
+      closeVoucherModal();
+      showAlert("warning", "Voucher eliminado de la factura.");
+    }
+
+    // =========================================================================
+    // 9. VISTA PREVIA MULTIPÁGINA DE FACTURA PDF (COMPATIBLE IPAD Y WINDOWS)
+    // =========================================================================
+    let currentPreviewInvoice = null;
+
+    function openVoucherFromCurrentPdf() {
+      if (!currentPreviewInvoice) return;
+      const targetId = currentPreviewInvoice.id;
+      closePreviewModal();
+      previewVoucherImage(targetId);
+    }
+
+    async function previewInvoicePdf(id) {
+      const inv = state.invoices.find((x) => x.id === id);
+      if (!inv) return;
+      currentPreviewInvoice = inv;
+
+      document.getElementById("previewModalTitle").textContent = `Factura ${inv.serie}-${inv.correlativo} — ${inv.proveedor}`;
+      document.getElementById("previewModalSubtitle").textContent = `Fecha: ${formatDateShort(inv.fecha)} | Monto: ${formatMoney(inv.monto, inv.moneda)} | Archivo: ${inv.fileName}`;
+
+      const btnVoucherInPdf = document.getElementById("btnPreviewVoucherFromPdf");
+      btnVoucherInPdf.style.display = hasVoucherAttached(inv) ? "inline-flex" : "none";
+
+      const container = document.getElementById("pdfCanvasContainer");
+      container.innerHTML = `<div style="padding:30px; font-weight:600; color:#334155;">Renderizando vista previa del documento PDF...</div>`;
+      document.getElementById("pdfPreviewModal").classList.add("open");
+
+      if (!inv.pdfBase64 && inv.driveFileId) {
+        container.innerHTML = `
+          <div style="background:#fff; padding:24px; border-radius:8px; text-align:center;">
+            <p style="margin-bottom:12px;">Este PDF está almacenado en tu Google Drive sincronizado.</p>
+            <a href="https://drive.google.com/file/d/${inv.driveFileId}/view" target="_blank" class="btn btn-primary">Abrir PDF en Google Drive</a>
+          </div>
+        `;
+        return;
+      }
+
+      if (!inv.pdfBase64) {
+        container.innerHTML = `<div style="background:#fff; padding:24px; border-radius:8px;">No hay datos binarios del PDF disponibles en este dispositivo.</div>`;
+        return;
+      }
+
+      try {
+        const base64Data = inv.pdfBase64.split(",").pop();
+        const raw = atob(base64Data);
+        const uint8Array = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) {
+          uint8Array[i] = raw.charCodeAt(i);
+        }
+
+        if (!window.pdfjsLib) {
+          throw new Error("PDF.js no disponible");
+        }
+
+        const pdf = await pdfjsLib.getDocument({
+          data: uint8Array,
+          disableWorker: true,
+          isEvalSupported: false
+        }).promise;
+        container.innerHTML = "";
+
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          container.appendChild(canvas);
+
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        }
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `
+          <div style="background:#fff; padding:24px; border-radius:8px; text-align:center;">
+            <p style="color:var(--danger); font-weight:600; margin-bottom:12px;">No se pudo previsualizar en lienzo en este navegador.</p>
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('btnDownloadPreviewPdf').click()">Descargar / Abrir PDF Original</button>
+          </div>
+        `;
+      }
+    }
+
+    document.getElementById("btnDownloadPreviewPdf").addEventListener("click", () => {
+      if (!currentPreviewInvoice) return;
+      if (currentPreviewInvoice.pdfBase64) {
+        const a = document.createElement("a");
+        a.href = currentPreviewInvoice.pdfBase64;
+        a.download = currentPreviewInvoice.fileName || `${currentPreviewInvoice.normalizedCode}.pdf`;
+        a.click();
+      } else if (currentPreviewInvoice.driveFileId) {
+        window.open(`https://drive.google.com/uc?export=download&id=${currentPreviewInvoice.driveFileId}`, "_blank");
+      }
+    });
+
+    function closePreviewModal() {
+      document.getElementById("pdfPreviewModal").classList.remove("open");
+      document.getElementById("pdfCanvasContainer").innerHTML = "";
+      currentPreviewInvoice = null;
+    }
+
+    // =========================================================================
+    // 10. VALIDACIÓN CONTRA CSV DEL SIRE SUNAT (DETECCIÓN DE FALTANTES)
+    // =========================================================================
+    document.getElementById("csvFileInput").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      e.target.value = "";
+
+      try {
+        const buffer = await readFileAsArrayBufferSafe(file);
+        let text = new TextDecoder("utf-8").decode(buffer);
+        if (text.includes("\uFFFD")) {
+          text = new TextDecoder("windows-1252").decode(buffer);
+        }
+
+        const sireRecords = parseSireCsvContent(text);
+        if (sireRecords.length === 0) {
+          showAlert("error", "No se encontraron comprobantes válidos en el archivo CSV. Asegúrate de subir el reporte RCE exportado desde SUNAT SIRE.");
+          return;
+        }
+
+        evaluateSireValidation(sireRecords, file.name);
+        await persistState();
+        pushValidationToCloud(state.validation);
+        renderAll();
+        if (state.validation && state.validation.missingCount === 0) {
+          showAlert("success", `Validación completada: las ${sireRecords.length} facturas del SIRE tienen su PDF respaldado.`);
+        }
+      } catch (err) {
+        console.error(err);
+        showAlert("error", "Error al procesar el archivo CSV del SIRE.");
+      }
+    });
+
+    function detectCsvDelimiter(headerLine) {
+      const candidates = ["|", ";", ",", "\t"];
+      let best = ",";
+      let maxCount = 0;
+      for (const c of candidates) {
+        const count = headerLine.split(c).length - 1;
+        if (count > maxCount) {
+          maxCount = count;
+          best = c;
+        }
+      }
+      return best;
+    }
+
+    function splitCsvRow(line, delimiter) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === delimiter && !inQuotes) {
+          result.push(current.trim());
+          current = "";
+        } else {
+          current += ch;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    function parseSireCsvContent(csvText) {
+      const lines = csvText.split(/\r?\n/).map((l) => l.trim()).filter((l) => l.length > 0);
+      if (lines.length < 2) return [];
+
+      let headerIdx = 0;
+      for (let i = 0; i < Math.min(lines.length, 10); i++) {
+        const low = lines[i].toLowerCase();
+        if ((low.includes("serie") || low.includes("cdp") || low.includes("comprobante")) && (low.includes("total") || low.includes("fecha") || low.includes("ruc"))) {
+          headerIdx = i;
+          break;
+        }
+      }
+
+      const delimiter = detectCsvDelimiter(lines[headerIdx]);
+      const headers = splitCsvRow(lines[headerIdx], delimiter).map((h) => h.toLowerCase());
+
+      const idxRuc = headers.findIndex((h) => h.includes("ruc") || h.includes("nro doc identidad"));
+      const idxRazon = headers.findIndex((h) => h.includes("razon") || h.includes("razón") || h.includes("apellidos") || h.includes("proveedor"));
+      const idxFecha = headers.findIndex((h) => h.includes("fecha de emision") || h.includes("fecha de emisión") || h.includes("fecha emision") || h.includes("fecha"));
+      const idxSerie = headers.findIndex((h) => h.includes("serie"));
+      const idxNumero = headers.findIndex((h) => h.includes("nro cp") || h.includes("numero") || h.includes("número") || h.includes("correlativo") || h.includes("nro inicial"));
+      const idxTotal = headers.findIndex((h) => h.includes("total cp") || h.includes("importe total") || h === "total" || h.includes("monto total"));
+      const idxMoneda = headers.findIndex((h) => h.includes("moneda"));
+      const idxTipo = headers.findIndex((h) => h.includes("tipo cp") || h.includes("tipo doc"));
+
+      const records = [];
+      for (let i = headerIdx + 1; i < lines.length; i++) {
+        const cols = splitCsvRow(lines[i], delimiter);
+        if (cols.length < 3) continue;
+
+        let serie = idxSerie !== -1 ? (cols[idxSerie] || "") : "";
+        let numero = idxNumero !== -1 ? (cols[idxNumero] || "") : "";
+
+        if (serie.includes("-") && !numero) {
+          const parts = serie.split("-");
+          serie = parts[0];
+          numero = parts[1];
+        }
+
+        if (!serie || !numero) {
+          for (let c = 0; c < cols.length; c++) {
+            const m = cols[c].match(/^([FBE][A-Z0-9]{3})-0*(\d+)$/i);
+            if (m) {
+              serie = m[1];
+              numero = m[2];
+              break;
+            }
+          }
+        }
+
+        if (!serie || !numero) continue;
+
+        const tipoDoc = idxTipo !== -1 ? (cols[idxTipo] || "") : "";
+        const ruc = idxRuc !== -1 ? (cols[idxRuc] || "").replace(/[^0-9]/g, "") : "";
+        const proveedor = idxRazon !== -1 ? (cols[idxRazon] || "PROVEEDOR SIRE") : "PROVEEDOR SIRE";
+        const rawFecha = idxFecha !== -1 ? (cols[idxFecha] || "") : "";
+        const moneda = idxMoneda !== -1 && /USD|DOLAR/i.test(cols[idxMoneda] || "") ? "USD" : "PEN";
+
+        let monto = 0;
+        if (idxTotal !== -1 && cols[idxTotal]) {
+          monto = Math.abs(parseFloat(cols[idxTotal].replace(/[^0-9.-]/g, "")) || 0);
+        }
+
+        const norm = normalizeInvoiceParts(serie, numero, ruc);
+        records.push({
+          tipoDoc,
+          serie: norm.serie,
+          correlativo: numero,
+          normalizedCode: norm.normalizedCode,
+          normalizedKey: norm.normalizedKey,
+          ruc,
+          proveedor: proveedor.toUpperCase(),
+          fecha: rawFecha,
+          moneda,
+          monto
+        });
+      }
+
+      return records;
+    }
+
+    function evaluateSireValidation(sireRecords, fileName, silent = false) {
+      const uploadedByCode = new Map();
+      state.invoices.forEach((inv) => {
+        uploadedByCode.set(inv.normalizedCode, inv);
+      });
+
+      const evaluatedItems = sireRecords.map((rec) => {
+        const found = uploadedByCode.has(rec.normalizedCode);
+        return {
+          ...rec,
+          status: found ? "MATCHED" : "MISSING"
+        };
+      });
+
+      const missingItems = evaluatedItems.filter((x) => x.status === "MISSING");
+      const matchedItems = evaluatedItems.filter((x) => x.status === "MATCHED");
+
+      const totalSire = evaluatedItems.length;
+      const missingCount = missingItems.length;
+      const missingPercent = totalSire > 0 ? ((missingCount / totalSire) * 100) : 0;
+
+      const missingAmountPEN = missingItems
+        .filter((x) => x.moneda !== "USD")
+        .reduce((acc, x) => acc + x.monto, 0);
+
+      const missingAmountUSD = missingItems
+        .filter((x) => x.moneda === "USD")
+        .reduce((acc, x) => acc + x.monto, 0);
+
+      state.validation = {
+        fileName,
+        evaluatedAt: new Date().toISOString(),
+        totalSire,
+        matchedCount: matchedItems.length,
+        missingCount,
+        missingPercent,
+        missingAmountPEN,
+        missingAmountUSD,
+        matchedNormalizedCodes: matchedItems.map((x) => x.normalizedCode),
+        items: evaluatedItems
+      };
+
+      if (!silent && missingCount > 0) {
+        showAlert(
+          "error",
+          `ALERTA SIRE: Faltan ${missingCount} de ${totalSire} facturas (${missingPercent.toFixed(1)}%) por subir en PDF, representando un monto total de ${formatMoney(missingAmountPEN, "PEN")}${missingAmountUSD > 0 ? " + " + formatMoney(missingAmountUSD, "USD") : ""}.`
+        );
+      }
+    }
+
+    function reRunLastValidation(silent = false) {
+      if (!state.validation || !state.validation.items) return;
+      evaluateSireValidation(state.validation.items, state.validation.fileName, silent);
+      persistState();
+      if (!silent) renderValidationSection();
+    }
+
+    function renderValidationSection() {
+      const v = state.validation;
+      const emptyEl = document.getElementById("sireEmptyState");
+      const kpiContainer = document.getElementById("sireKpiContainer");
+      const errBanner = document.getElementById("sireErrorBanner");
+      const okBanner = document.getElementById("sireSuccessBanner");
+
+      if (!v) {
+        emptyEl.style.display = "block";
+        kpiContainer.style.display = "none";
+        errBanner.style.display = "none";
+        okBanner.style.display = "none";
+        return;
+      }
+
+      emptyEl.style.display = "none";
+      kpiContainer.style.display = "block";
+
+      document.getElementById("sireLastRunInfo").textContent =
+        `Archivo validado: ${v.fileName} | Última revisión: ${new Date(v.evaluatedAt).toLocaleString("es-PE")}`;
+
+      document.getElementById("kpiTotalSire").textContent = `${v.totalSire} docs`;
+      document.getElementById("kpiMatchedSire").textContent = `${v.matchedCount} respaldadas en PDF`;
+      document.getElementById("kpiMissingCount").textContent = `${v.missingCount} ${v.missingCount === 1 ? "documento" : "documentos"}`;
+      document.getElementById("kpiMissingPct").textContent = `${v.missingPercent.toFixed(1)}%`;
+      document.getElementById("kpiMissingBar").style.width = `${Math.min(100, v.missingPercent)}%`;
+      document.getElementById("kpiMissingAmount").textContent = formatMoney(v.missingAmountPEN, "PEN");
+      document.getElementById("kpiMissingAmountUsd").textContent =
+        v.missingAmountUSD > 0 ? `+ ${formatMoney(v.missingAmountUSD, "USD")} en dólares` : "Suma total de facturas sin PDF";
+
+      if (v.missingCount > 0) {
+        errBanner.style.display = "block";
+        okBanner.style.display = "none";
+        document.getElementById("sireErrorBannerTitle").textContent =
+          `ERROR DE VALIDACIÓN SIRE: Faltan ${v.missingCount} factura(s) (${v.missingPercent.toFixed(1)}%) por subir al sistema`;
+        document.getElementById("sireErrorBannerDesc").textContent =
+          `De un total de ${v.totalSire} comprobantes declarados en SUNAT SIRE, aún no se han subido ${v.missingCount} documentos en PDF por un valor total de ${formatMoney(v.missingAmountPEN, "PEN")}${v.missingAmountUSD > 0 ? " y " + formatMoney(v.missingAmountUSD, "USD") : ""}.`;
+      } else {
+        errBanner.style.display = "none";
+        okBanner.style.display = "block";
+      }
+
+      renderValidationTable();
+    }
+
+    function renderValidationTable() {
+      const v = state.validation;
+      if (!v) return;
+      const filter = document.getElementById("sireFilterView").value;
+      const tbody = document.getElementById("sireValidationTbody");
+
+      let rows = v.items;
+      if (filter === "MISSING") rows = rows.filter((x) => x.status === "MISSING");
+      if (filter === "MATCHED") rows = rows.filter((x) => x.status === "MATCHED");
+
+      if (rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text-secondary);">No hay registros en esta categoría.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map((item) => {
+        const isMissing = item.status === "MISSING";
+        return `
+          <tr>
+            <td>
+              ${isMissing
+                ? `<span class="status-tag status-missing">FALTA PDF</span>`
+                : `<span class="status-tag status-ok">SUBIDA OK</span>`}
+            </td>
+            <td>${item.fecha || "-"}</td>
+            <td>
+              <span class="code-mono">${item.serie}-${item.correlativo}</span>
+              <span class="sub-text">Ref: ${item.normalizedCode}</span>
+            </td>
+            <td>
+              <strong>${item.proveedor}</strong>
+              <span class="sub-text">${item.ruc ? "RUC: " + item.ruc : ""}</span>
+            </td>
+            <td><strong>${formatMoney(item.monto, item.moneda)}</strong></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // =========================================================================
+    // 11. SINCRONIZACIÓN EN LA NUBE (ENLACE COMPARTIDO TABLET <-> PC COMPAÑERO)
+    // =========================================================================
+    function isFirebaseUrl(url) {
+      return /firebaseio\.com|firebasedatabase\.app/i.test(url);
+    }
+
+    async function saveSyncSettings() {
+      const companyName = document.getElementById("cfgCompanyName").value.trim() || "Control de Compras";
+      const userName = document.getElementById("cfgUserName").value.trim() || "Usuario";
+      const syncUrl = document.getElementById("cfgSyncUrl").value.trim();
+
+      state.settings = { companyName, userName, syncUrl };
+      await persistState();
+      updateHeaderAndBadges();
+
+      if (syncUrl) {
+        await syncWithCloud(true);
+      } else {
+        showAlert("success", "Configuración local guardada correctamente.");
+      }
+    }
+
+    async function disconnectCloud() {
+      state.settings.syncUrl = "";
+      document.getElementById("cfgSyncUrl").value = "";
+      await persistState();
+      updateHeaderAndBadges();
+      showAlert("warning", "Enlace de nube desconectado. El sistema sigue funcionando localmente.");
+    }
+
+    async function syncWithCloud(showFeedback = false) {
+      const url = (state.settings.syncUrl || "").trim();
+      if (!url) return;
+
+      const dot = document.getElementById("syncStatusDot");
+      const txt = document.getElementById("syncStatusText");
+      dot.className = "dot syncing";
+      txt.textContent = "Sincronizando...";
+
+      try {
+        let remoteData = null;
+
+        if (isFirebaseUrl(url)) {
+          const cleanBase = url.replace(/\/+$/, "");
+          const getRes = await fetch(`${cleanBase}/compras_sire_db.json`);
+          remoteData = await getRes.json();
+        } else {
+          const getRes = await fetch(url);
+          const json = await getRes.json();
+          remoteData = json.data || json;
+        }
+
+        const mergedMap = new Map();
+        const remoteInvoices = (remoteData && Array.isArray(remoteData.invoices)) ? remoteData.invoices : [];
+        remoteInvoices.forEach((inv) => mergedMap.set(inv.normalizedCode, inv));
+        state.invoices.forEach((localInv) => {
+          const existing = mergedMap.get(localInv.normalizedCode);
+          if (!existing) {
+            mergedMap.set(localInv.normalizedCode, localInv);
+          } else {
+            const merged = { ...existing, ...localInv };
+            if (!localInv.pdfBase64 && existing.pdfBase64) merged.pdfBase64 = existing.pdfBase64;
+            if (!localInv.driveFileId && existing.driveFileId) merged.driveFileId = existing.driveFileId;
+            if (!localInv.voucherBase64 && existing.voucherBase64) merged.voucherBase64 = existing.voucherBase64;
+            if (!localInv.voucherDriveFileId && existing.voucherDriveFileId) merged.voucherDriveFileId = existing.voucherDriveFileId;
+            mergedMap.set(localInv.normalizedCode, merged);
+          }
+        });
+
+        state.invoices = Array.from(mergedMap.values());
+
+        if (remoteData && remoteData.validation) {
+          if (!state.validation || new Date(remoteData.validation.evaluatedAt) > new Date(state.validation.evaluatedAt)) {
+            state.validation = remoteData.validation;
+          }
+        }
+        if (state.validation) {
+          reRunLastValidation(true);
+        }
+
+        if (isFirebaseUrl(url)) {
+          const cleanBase = url.replace(/\/+$/, "");
+          const lightInvoices = state.invoices.map((x) => {
+            const copy = { ...x };
+            if (copy.pdfBase64 && copy.pdfBase64.length > 600000) {
+              delete copy.pdfBase64;
+            }
+            return copy;
+          });
+          await fetch(`${cleanBase}/compras_sire_db.json`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              invoices: lightInvoices,
+              validation: state.validation
+            })
+          });
+        } else {
+          for (const inv of state.invoices) {
+            const remoteMatch = remoteInvoices.find((r) => r.normalizedCode === inv.normalizedCode);
+            const needsVoucherSync = inv.voucherBase64 && (!remoteMatch || !remoteMatch.voucherDriveFileId);
+            if (!remoteMatch || needsVoucherSync) {
+              await pushInvoiceToCloud(inv);
+            }
+          }
+          if (state.validation) {
+            await pushValidationToCloud(state.validation);
+          }
+        }
+
+        await persistState();
+        renderAll();
+
+        dot.className = "dot online";
+        txt.textContent = `Sincronizado (${state.settings.userName})`;
+        if (showFeedback) {
+          showAlert("success", `Sincronización completada. Total en equipo: ${state.invoices.length} facturas.`);
+        }
+      } catch (err) {
+        console.error(err);
+        dot.className = "dot";
+        txt.textContent = "Error de conexión nube";
+        if (showFeedback) {
+          showAlert("error", "No se pudo conectar con el enlace de sincronización. Verifica la URL y los permisos de acceso.");
+        }
+      }
+    }
+
+    async function pushInvoiceToCloud(invoice) {
+      const url = (state.settings.syncUrl || "").trim();
+      if (!url) return;
+      try {
+        if (isFirebaseUrl(url)) {
+          await syncWithCloud(false);
+        } else {
+          await fetch(url, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "UPSERT_INVOICE",
+              invoice
+            })
+          });
+        }
+      } catch (e) {
+        console.warn("Pendiente de sincronizar luego:", e);
+      }
+    }
+
+    async function deleteInvoiceFromCloud(id) {
+      const url = (state.settings.syncUrl || "").trim();
+      if (!url) return;
+      try {
+        if (isFirebaseUrl(url)) {
+          await syncWithCloud(false);
+        } else {
+          await fetch(url, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "DELETE_INVOICE",
+              id
+            })
+          });
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    async function pushValidationToCloud(validation) {
+      const url = (state.settings.syncUrl || "").trim();
+      if (!url) return;
+      try {
+        if (isFirebaseUrl(url)) {
+          await syncWithCloud(false);
+        } else {
+          await fetch(url, {
+            method: "POST",
+            body: JSON.stringify({
+              action: "SAVE_VALIDATION",
+              validation
+            })
+          });
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+
+    function exportFullBackup() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        companyName: state.settings.companyName,
+        invoices: state.invoices,
+        validation: state.validation
+      };
+      const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Respaldo_Compras_SIRE_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("backupFileInput").addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      e.target.value = "";
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!Array.isArray(data.invoices)) throw new Error("Formato inválido");
+
+        let imported = 0;
+        data.invoices.forEach((inv) => {
+          const existingDup = findDuplicateInvoice(inv.serie, inv.correlativo, inv.rucProveedor);
+          if (!existingDup) {
+            state.invoices.push(inv);
+            imported++;
+          } else if (!hasVoucherAttached(existingDup) && hasVoucherAttached(inv)) {
+            existingDup.voucherBase64 = inv.voucherBase64 || null;
+            existingDup.voucherDriveFileId = inv.voucherDriveFileId || null;
+          }
+        });
+        if (data.validation) state.validation = data.validation;
+        if (state.validation) reRunLastValidation(true);
+
+        await persistState();
+        renderAll();
+        showAlert("success", `Importación completada: se añadieron ${imported} facturas nuevas y se actualizaron vouchers faltantes.`);
+      } catch (err) {
+        showAlert("error", "El archivo JSON seleccionado no tiene un formato de respaldo válido.");
+      }
+    });
+
+    function copyAppsScriptCode() {
+      const code = document.getElementById("appsScriptSnippet").textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          showAlert("success", "Código de Google Apps Script copiado al portapapeles.");
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showAlert("success", "Código de Google Apps Script copiado al portapapeles.");
+      }
+    }
+
+    // =========================================================================
+    // 12. NAVEGACIÓN, ALERTAS E INICIALIZACIÓN INMEDIATA
+    // =========================================================================
+    function switchTab(tabName) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+      document.querySelectorAll(".view-section").forEach((sec) => {
+        sec.classList.toggle("active", sec.id === `view-${tabName}`);
+      });
+    }
+
+    function showAlert(type, message) {
+      const stack = document.getElementById("alertStack");
+      const div = document.createElement("div");
+      div.className = `alert-box ${type}`;
+      div.innerHTML = `
+        <div>${message}</div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+      `;
+      stack.prepend(div);
+      if (type === "success") {
+        setTimeout(() => { if (div.parentElement) div.remove(); }, 7000);
+      }
+    }
+
+    function updateHeaderAndBadges() {
+      const company = state.settings.companyName || "Control de Compras";
+      document.getElementById("headerCompanyTitle").textContent = `${company} — Archivo de Compras SUNAT`;
+      document.getElementById("badgeTotalDocs").textContent = state.invoices.length;
+
+      const missingBadge = document.getElementById("badgeMissingDocs");
+      if (!state.validation) {
+        missingBadge.textContent = "Sin validar";
+        missingBadge.className = "tab-badge";
+      } else if (state.validation.missingCount > 0) {
+        missingBadge.textContent = `Faltan ${state.validation.missingCount}`;
+        missingBadge.className = "tab-badge alert";
+      } else {
+        missingBadge.textContent = "100% OK";
+        missingBadge.className = "tab-badge";
+      }
+
+      const dot = document.getElementById("syncStatusDot");
+      const txt = document.getElementById("syncStatusText");
+      const btnQuick = document.getElementById("btnQuickSync");
+      if (state.settings.syncUrl) {
+        dot.className = "dot online";
+        txt.textContent = `Conectado (${state.settings.userName})`;
+        btnQuick.style.display = "inline-flex";
+      } else {
+        dot.className = "dot";
+        txt.textContent = "Modo Local (Configurar enlace)";
+        btnQuick.style.display = "none";
+      }
+    }
+
+    function renderAll() {
+      updateHeaderAndBadges();
+      if (state.selectedMonthKey) {
+        renderMonthDetailTable();
+      } else {
+        renderMonthsGrid();
+      }
+      renderValidationSection();
+    }
+
+    async function initApp() {
+      renderAll();
+      try {
+        const savedInvoices = await dbGet("invoices");
+        const savedValidation = await dbGet("validation");
+        const savedSettings = await dbGet("settings");
+
+        if (Array.isArray(savedInvoices)) state.invoices = savedInvoices;
+        if (savedValidation) state.validation = savedValidation;
+        if (savedSettings) state.settings = { ...state.settings, ...savedSettings };
+
+        document.getElementById("cfgCompanyName").value = state.settings.companyName || "";
+        document.getElementById("cfgUserName").value = state.settings.userName || "";
+        document.getElementById("cfgSyncUrl").value = state.settings.syncUrl || "";
+
+        renderAll();
+
+        if (state.settings.syncUrl) {
+          syncWithCloud(false);
+        }
+      } catch (e) {
+        console.error("Error inicializando almacenamiento:", e);
+        renderAll();
+      }
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
